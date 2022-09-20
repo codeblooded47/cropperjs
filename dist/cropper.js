@@ -5,28 +5,23 @@
  * Copyright 2015-present Chen Fengyuan
  * Released under the MIT license
  *
- * Date: 2021-06-12T08:00:17.411Z
+ * Date: 2022-09-19T23:56:47.482Z
  */
 
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.Cropper = factory());
-}(this, (function () { 'use strict';
+})(this, (function () { 'use strict';
 
   function ownKeys(object, enumerableOnly) {
     var keys = Object.keys(object);
 
     if (Object.getOwnPropertySymbols) {
       var symbols = Object.getOwnPropertySymbols(object);
-
-      if (enumerableOnly) {
-        symbols = symbols.filter(function (sym) {
-          return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-        });
-      }
-
-      keys.push.apply(keys, symbols);
+      enumerableOnly && (symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      })), keys.push.apply(keys, symbols);
     }
 
     return keys;
@@ -34,19 +29,12 @@
 
   function _objectSpread2(target) {
     for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-
-      if (i % 2) {
-        ownKeys(Object(source), true).forEach(function (key) {
-          _defineProperty(target, key, source[key]);
-        });
-      } else if (Object.getOwnPropertyDescriptors) {
-        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-      } else {
-        ownKeys(Object(source)).forEach(function (key) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-        });
-      }
+      var source = null != arguments[i] ? arguments[i] : {};
+      i % 2 ? ownKeys(Object(source), !0).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
     }
 
     return target;
@@ -55,17 +43,11 @@
   function _typeof(obj) {
     "@babel/helpers - typeof";
 
-    if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
-      _typeof = function (obj) {
-        return typeof obj;
-      };
-    } else {
-      _typeof = function (obj) {
-        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-      };
-    }
-
-    return _typeof(obj);
+    return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+      return typeof obj;
+    } : function (obj) {
+      return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+    }, _typeof(obj);
   }
 
   function _classCallCheck(instance, Constructor) {
@@ -87,6 +69,9 @@
   function _createClass(Constructor, protoProps, staticProps) {
     if (protoProps) _defineProperties(Constructor.prototype, protoProps);
     if (staticProps) _defineProperties(Constructor, staticProps);
+    Object.defineProperty(Constructor, "prototype", {
+      writable: false
+    });
     return Constructor;
   }
 
@@ -286,7 +271,7 @@
    */
 
   function isNumber(value) {
-    return typeof value === 'number' && !isNaN(value);
+    return typeof value === "number" && !isNaN(value);
   }
   /**
    * Check if the given value is a positive number.
@@ -304,7 +289,7 @@
    */
 
   function isUndefined(value) {
-    return typeof value === 'undefined';
+    return typeof value === "undefined";
   }
   /**
    * Check if the given value is an object.
@@ -313,7 +298,7 @@
    */
 
   function isObject(value) {
-    return _typeof(value) === 'object' && value !== null;
+    return _typeof(value) === "object" && value !== null;
   }
   var hasOwnProperty = Object.prototype.hasOwnProperty;
   /**
@@ -330,7 +315,7 @@
     try {
       var _constructor = value.constructor;
       var prototype = _constructor.prototype;
-      return _constructor && prototype && hasOwnProperty.call(prototype, 'isPrototypeOf');
+      return _constructor && prototype && hasOwnProperty.call(prototype, "isPrototypeOf");
     } catch (error) {
       return false;
     }
@@ -342,7 +327,7 @@
    */
 
   function isFunction(value) {
-    return typeof value === 'function';
+    return typeof value === "function";
   }
   var slice = Array.prototype.slice;
   /**
@@ -366,10 +351,10 @@
       if (Array.isArray(data) || isNumber(data.length)
       /* array-like */
       ) {
-          toArray(data).forEach(function (value, key) {
-            callback.call(data, value, key, data);
-          });
-        } else if (isObject(data)) {
+        toArray(data).forEach(function (value, key) {
+          callback.call(data, value, key, data);
+        });
+      } else if (isObject(data)) {
         Object.keys(data).forEach(function (key) {
           callback.call(data, data[key], key, data);
         });
@@ -497,7 +482,7 @@
     }
 
     if (element.className.indexOf(value) >= 0) {
-      element.className = element.className.replace(value, '');
+      element.className = element.className.replace(value, "");
     }
   }
   /**
@@ -534,7 +519,7 @@
    */
 
   function toParamCase(value) {
-    return value.replace(REGEXP_CAMEL_CASE, '$1-$2').toLowerCase();
+    return value.replace(REGEXP_CAMEL_CASE, "$1-$2").toLowerCase();
   }
   /**
    * Get data from the given element.
@@ -604,7 +589,7 @@
 
       var listener = function listener() {};
 
-      var options = Object.defineProperty({}, 'once', {
+      var options = Object.defineProperty({}, "once", {
         get: function get() {
           supported = true;
           return once;
@@ -619,8 +604,8 @@
           once = value;
         }
       });
-      WINDOW.addEventListener('test', listener, options);
-      WINDOW.removeEventListener('test', listener, options);
+      WINDOW.addEventListener("test", listener, options);
+      WINDOW.removeEventListener("test", listener, options);
     }
 
     return supported;
@@ -718,7 +703,7 @@
         cancelable: true
       });
     } else {
-      event = document.createEvent('CustomEvent');
+      event = document.createEvent("CustomEvent");
       event.initCustomEvent(type, true, true, data);
     }
 
@@ -757,7 +742,7 @@
 
   function addTimestamp(url) {
     var timestamp = "timestamp=".concat(new Date().getTime());
-    return url + (url.indexOf('?') === -1 ? '?' : '&') + timestamp;
+    return url + (url.indexOf("?") === -1 ? "?" : "&") + timestamp;
   }
   /**
    * Get transforms base on the given object.
@@ -794,7 +779,7 @@
       values.push("scaleY(".concat(scaleY, ")"));
     }
 
-    var transform = values.length ? values.join(' ') : 'none';
+    var transform = values.length ? values.join(" ") : "none";
     return {
       WebkitTransform: transform,
       msTransform: transform,
@@ -879,19 +864,18 @@
    * @returns {Object} The result sizes.
    */
 
-  function getAdjustedSizes(_ref4) // or 'cover'
-  {
+  function getAdjustedSizes(_ref4) {
     var aspectRatio = _ref4.aspectRatio,
         height = _ref4.height,
         width = _ref4.width;
-    var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'contain';
+    var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "contain";
     var isValidWidth = isPositiveNumber(width);
     var isValidHeight = isPositiveNumber(height);
 
     if (isValidWidth && isValidHeight) {
       var adjustedWidth = height * aspectRatio;
 
-      if (type === 'contain' && adjustedWidth > width || type === 'cover' && adjustedWidth < width) {
+      if (type === "contain" && adjustedWidth > width || type === "cover" && adjustedWidth < width) {
         height = width / aspectRatio;
       } else {
         width = height * aspectRatio;
@@ -962,11 +946,11 @@
         naturalWidth = _ref7.naturalWidth,
         naturalHeight = _ref7.naturalHeight;
     var _ref8$fillColor = _ref8.fillColor,
-        fillColor = _ref8$fillColor === void 0 ? 'transparent' : _ref8$fillColor,
+        fillColor = _ref8$fillColor === void 0 ? "transparent" : _ref8$fillColor,
         _ref8$imageSmoothingE = _ref8.imageSmoothingEnabled,
         imageSmoothingEnabled = _ref8$imageSmoothingE === void 0 ? true : _ref8$imageSmoothingE,
         _ref8$imageSmoothingQ = _ref8.imageSmoothingQuality,
-        imageSmoothingQuality = _ref8$imageSmoothingQ === void 0 ? 'low' : _ref8$imageSmoothingQ,
+        imageSmoothingQuality = _ref8$imageSmoothingQ === void 0 ? "low" : _ref8$imageSmoothingQ,
         _ref8$maxWidth = _ref8.maxWidth,
         maxWidth = _ref8$maxWidth === void 0 ? Infinity : _ref8$maxWidth,
         _ref8$maxHeight = _ref8.maxHeight,
@@ -975,8 +959,8 @@
         minWidth = _ref8$minWidth === void 0 ? 0 : _ref8$minWidth,
         _ref8$minHeight = _ref8.minHeight,
         minHeight = _ref8$minHeight === void 0 ? 0 : _ref8$minHeight;
-    var canvas = document.createElement('canvas');
-    var context = canvas.getContext('2d');
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
     var maxSizes = getAdjustedSizes({
       aspectRatio: aspectRatio,
       width: maxWidth,
@@ -986,7 +970,7 @@
       aspectRatio: aspectRatio,
       width: minWidth,
       height: minHeight
-    }, 'cover');
+    }, "cover");
     var width = Math.min(maxSizes.width, Math.max(minSizes.width, naturalWidth));
     var height = Math.min(maxSizes.height, Math.max(minSizes.height, naturalHeight)); // Note: should always use image's natural sizes for drawing as
     // imageData.naturalWidth === canvasData.naturalHeight when rotate % 180 === 90
@@ -1000,7 +984,7 @@
       aspectRatio: imageAspectRatio,
       width: minWidth,
       height: minHeight
-    }, 'cover');
+    }, "cover");
     var destWidth = Math.min(destMaxSizes.width, Math.max(destMinSizes.width, imageNaturalWidth));
     var destHeight = Math.min(destMaxSizes.height, Math.max(destMinSizes.height, imageNaturalHeight));
     var params = [-destWidth / 2, -destHeight / 2, destWidth, destHeight];
@@ -1014,6 +998,13 @@
     context.scale(scaleX, scaleY);
     context.imageSmoothingEnabled = imageSmoothingEnabled;
     context.imageSmoothingQuality = imageSmoothingQuality;
+    var background = new Image();
+    background.src = "https://images.pexels.com/photos/13328857/pexels-photo-13328857.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"; // Make sure the image is loaded first otherwise nothing will draw.
+
+    background.onload = function () {
+      context.drawImage(background, 0, 0);
+    };
+
     context.drawImage.apply(context, [image].concat(_toConsumableArray(params.map(function (param) {
       return Math.floor(normalizeDecimalNumber(param));
     }))));
@@ -1030,7 +1021,7 @@
    */
 
   function getStringFromCharCode(dataView, start, length) {
-    var str = '';
+    var str = "";
     length += start;
 
     for (var i = start; i < length; i += 1) {
@@ -1047,7 +1038,7 @@
    */
 
   function dataURLToArrayBuffer(dataURL) {
-    var base64 = dataURL.replace(REGEXP_DATA_URL_HEAD, '');
+    var base64 = dataURL.replace(REGEXP_DATA_URL_HEAD, "");
     var binary = atob(base64);
     var arrayBuffer = new ArrayBuffer(binary.length);
     var uint8 = new Uint8Array(arrayBuffer);
@@ -1076,7 +1067,7 @@
       uint8 = uint8.subarray(chunkSize);
     }
 
-    return "data:".concat(mimeType, ";base64,").concat(btoa(chunks.join('')));
+    return "data:".concat(mimeType, ";base64,").concat(btoa(chunks.join("")));
   }
   /**
    * Get orientation value from given array buffer.
@@ -1093,12 +1084,12 @@
       var app1Start;
       var ifdStart; // Only handle JPEG image (start by 0xFFD8)
 
-      if (dataView.getUint8(0) === 0xFF && dataView.getUint8(1) === 0xD8) {
+      if (dataView.getUint8(0) === 0xff && dataView.getUint8(1) === 0xd8) {
         var length = dataView.byteLength;
         var offset = 2;
 
         while (offset + 1 < length) {
-          if (dataView.getUint8(offset) === 0xFF && dataView.getUint8(offset + 1) === 0xE1) {
+          if (dataView.getUint8(offset) === 0xff && dataView.getUint8(offset + 1) === 0xe1) {
             app1Start = offset;
             break;
           }
@@ -1111,21 +1102,21 @@
         var exifIDCode = app1Start + 4;
         var tiffOffset = app1Start + 10;
 
-        if (getStringFromCharCode(dataView, exifIDCode, 4) === 'Exif') {
+        if (getStringFromCharCode(dataView, exifIDCode, 4) === "Exif") {
           var endianness = dataView.getUint16(tiffOffset);
           littleEndian = endianness === 0x4949;
 
-          if (littleEndian || endianness === 0x4D4D
+          if (littleEndian || endianness === 0x4d4d
           /* bigEndian */
           ) {
-              if (dataView.getUint16(tiffOffset + 2, littleEndian) === 0x002A) {
-                var firstIFDOffset = dataView.getUint32(tiffOffset + 4, littleEndian);
+            if (dataView.getUint16(tiffOffset + 2, littleEndian) === 0x002a) {
+              var firstIFDOffset = dataView.getUint32(tiffOffset + 4, littleEndian);
 
-                if (firstIFDOffset >= 0x00000008) {
-                  ifdStart = tiffOffset + firstIFDOffset;
-                }
+              if (firstIFDOffset >= 0x00000008) {
+                ifdStart = tiffOffset + firstIFDOffset;
               }
             }
+          }
         }
       }
 
@@ -1142,14 +1133,14 @@
           if (dataView.getUint16(_offset, littleEndian) === 0x0112
           /* Orientation */
           ) {
-              // 8 is the offset of the current tag's value
-              _offset += 8; // Get the original orientation value
+            // 8 is the offset of the current tag's value
+            _offset += 8; // Get the original orientation value
 
-              orientation = dataView.getUint16(_offset, littleEndian); // Override the orientation with its default value
+            orientation = dataView.getUint16(_offset, littleEndian); // Override the orientation with its default value
 
-              dataView.setUint16(_offset, 1, littleEndian);
-              break;
-            }
+            dataView.setUint16(_offset, 1, littleEndian);
+            break;
+          }
         }
       }
     } catch (error) {
@@ -2526,7 +2517,7 @@
           if (this.ready) {
             this.viewBoxImage.src = url;
             forEach(this.previews, function (element) {
-              element.getElementsByTagName('img')[0].src = url;
+              element.getElementsByTagName("img")[0].src = url;
             });
           }
         } else {
@@ -2921,7 +2912,7 @@
       var data = {};
 
       if (this.ready) {
-        forEach(['left', 'top', 'width', 'height', 'naturalWidth', 'naturalHeight'], function (n) {
+        forEach(["left", "top", "width", "height", "naturalWidth", "naturalHeight"], function (n) {
           data[n] = canvasData[n];
         });
       }
@@ -3039,10 +3030,10 @@
 
       var canvasData = this.canvasData;
       var source = getSourceCanvas(this.image, this.imageData, canvasData, options); // Returns the source canvas if it is not cropped.
-
-      if (!this.cropped) {
-        return source;
-      }
+      // if (!this.cropped) {
+      //   console.log(source);
+      //   return source;
+      // }
 
       var _this$getData = this.getData(),
           initialX = _this$getData.x,
@@ -3069,7 +3060,7 @@
         aspectRatio: aspectRatio,
         width: options.minWidth || 0,
         height: options.minHeight || 0
-      }, 'cover');
+      }, "cover");
 
       var _getAdjustedSizes = getAdjustedSizes({
         aspectRatio: aspectRatio,
@@ -3081,11 +3072,11 @@
 
       width = Math.min(maxSizes.width, Math.max(minSizes.width, width));
       height = Math.min(maxSizes.height, Math.max(minSizes.height, height));
-      var canvas = document.createElement('canvas');
-      var context = canvas.getContext('2d');
+      var canvas = document.createElement("canvas");
+      var context = canvas.getContext("2d");
       canvas.width = normalizeDecimalNumber(width);
       canvas.height = normalizeDecimalNumber(height);
-      context.fillStyle = options.fillColor || 'transparent';
+      context.fillStyle = options.fillColor || "transparent";
       context.fillRect(0, 0, width, height);
       var _options$imageSmoothi = options.imageSmoothingEnabled,
           imageSmoothingEnabled = _options$imageSmoothi === void 0 ? true : _options$imageSmoothi,
@@ -3150,6 +3141,14 @@
       } // All the numerical parameters should be integer for `drawImage`
       // https://github.com/fengyuanchen/cropper/issues/476
 
+
+      var background = new Image();
+      background.crossOrigin = "https://images.pexels.com/photos/4879860/pexels-photo-4879860.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load";
+      background.src = "https://images.pexels.com/photos/4879860/pexels-photo-4879860.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load"; // Make sure the image is loaded first otherwise nothing will draw.
+
+      background.onload = function () {
+        context.drawImage(background, 0, 0); // document.querySelector("#test-image").src = canvas.toDataURL();
+      };
 
       context.drawImage.apply(context, [source].concat(_toConsumableArray(params.map(function (param) {
         return Math.floor(normalizeDecimalNumber(param));
@@ -3577,7 +3576,12 @@
         this.ready = false;
         this.unbind();
         this.resetPreview();
-        this.cropper.parentNode.removeChild(this.cropper);
+        var parentNode = this.cropper.parentNode;
+
+        if (parentNode) {
+          parentNode.removeChild(this.cropper);
+        }
+
         removeClass(this.element, CLASS_HIDDEN);
       }
     }, {
@@ -3628,4 +3632,5 @@
 
   return Cropper;
 
-})));
+}));
+//# sourceMappingURL=cropper.js.map

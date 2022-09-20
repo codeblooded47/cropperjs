@@ -10,7 +10,7 @@ import {
   DRAG_MODE_NONE,
   EVENT_ZOOM,
   NAMESPACE,
-} from './constants';
+} from "./constants";
 import {
   addClass,
   assign,
@@ -27,7 +27,106 @@ import {
   removeClass,
   setData,
   toggleClass,
-} from './utilities';
+} from "./utilities";
+
+// Defaults
+var defaultOptions = {
+  format: "image/png",
+  quality: 0.92,
+  width: undefined,
+  height: undefined,
+  Canvas: undefined,
+  crossOrigin: undefined,
+};
+
+// Return Promise
+var mergeImages = function (sources, options) {
+  if (sources === void 0) sources = [];
+  if (options === void 0) options = {};
+
+  return new Promise(function (resolve) {
+    options = Object.assign({}, defaultOptions, options);
+
+    // Setup browser/Node.js specific variables
+    var canvas = options.Canvas
+      ? new options.Canvas()
+      : window.document.createElement("canvas");
+    var Image = options.Image || window.Image;
+
+    // Load sources
+    var images = sources.map(function (source) {
+      return new Promise(function (resolve, reject) {
+        // Convert sources to objects
+        if (source.constructor.name !== "Object") {
+          source = { src: source };
+        }
+
+        // Resolve source and img when loaded
+        var img = new Image();
+        img.crossOrigin = options.crossOrigin;
+        img.onerror = function () {
+          return reject(new Error("Couldn't load image"));
+        };
+        img.onload = function () {
+          return resolve(Object.assign({}, source, { img: img }));
+        };
+        img.src = source.src;
+      });
+    });
+
+    // Get canvas context
+    var ctx = canvas.getContext("2d");
+
+    // When sources have loaded
+    resolve(
+      Promise.all(images).then(function (images) {
+        // Set canvas dimensions
+        var getSize = function (dim) {
+          return (
+            options[dim] ||
+            Math.max.apply(
+              Math,
+              images.map(function (image) {
+                return image.img[dim];
+              })
+            )
+          );
+        };
+        canvas.width = getSize("width");
+        canvas.height = getSize("height");
+
+        // Draw images to canvas
+        images.forEach(function (image) {
+          ctx.globalAlpha = image.opacity ? image.opacity : 1;
+          return ctx.drawImage(image.img, image.x || 0, image.y || 0);
+        });
+
+        if (options.Canvas && options.format === "image/jpeg") {
+          // Resolve data URI for node-canvas jpeg async
+          return new Promise(function (resolve, reject) {
+            canvas.toDataURL(
+              options.format,
+              {
+                quality: options.quality,
+                progressive: false,
+              },
+              function (err, jpeg) {
+                if (err) {
+                  reject(err);
+                  return;
+                }
+                resolve(jpeg);
+              }
+            );
+          });
+        }
+
+        // Resolve all other data URIs sync
+        return canvas;
+      })
+    );
+  });
+};
 
 export default {
   // Show the crop box manually
@@ -106,7 +205,7 @@ export default {
           this.viewBoxImage.src = url;
 
           forEach(this.previews, (element) => {
-            element.getElementsByTagName('img')[0].src = url;
+            element.getElementsByTagName("img")[0].src = url;
           });
         }
       } else {
@@ -174,8 +273,8 @@ export default {
     const { left, top } = this.canvasData;
 
     return this.moveTo(
-      isUndefined(offsetX) ? offsetX : (left + Number(offsetX)),
-      isUndefined(offsetY) ? offsetY : (top + Number(offsetY)),
+      isUndefined(offsetX) ? offsetX : left + Number(offsetX),
+      isUndefined(offsetY) ? offsetY : top + Number(offsetY)
     );
   },
 
@@ -228,7 +327,11 @@ export default {
       ratio = 1 + ratio;
     }
 
-    return this.zoomTo((canvasData.width * ratio) / canvasData.naturalWidth, null, _originalEvent);
+    return this.zoomTo(
+      (canvasData.width * ratio) / canvasData.naturalWidth,
+      null,
+      _originalEvent
+    );
   },
 
   /**
@@ -240,12 +343,7 @@ export default {
    */
   zoomTo(ratio, pivot, _originalEvent) {
     const { options, canvasData } = this;
-    const {
-      width,
-      height,
-      naturalWidth,
-      naturalHeight,
-    } = canvasData;
+    const { width, height, naturalWidth, naturalHeight } = canvasData;
 
     ratio = Number(ratio);
 
@@ -253,36 +351,43 @@ export default {
       const newWidth = naturalWidth * ratio;
       const newHeight = naturalHeight * ratio;
 
-      if (dispatchEvent(this.element, EVENT_ZOOM, {
-        ratio,
-        oldRatio: width / naturalWidth,
-        originalEvent: _originalEvent,
-      }) === false) {
+      if (
+        dispatchEvent(this.element, EVENT_ZOOM, {
+          ratio,
+          oldRatio: width / naturalWidth,
+          originalEvent: _originalEvent,
+        }) === false
+      ) {
         return this;
       }
 
       if (_originalEvent) {
         const { pointers } = this;
         const offset = getOffset(this.cropper);
-        const center = pointers && Object.keys(pointers).length ? getPointersCenter(pointers) : {
-          pageX: _originalEvent.pageX,
-          pageY: _originalEvent.pageY,
-        };
+        const center =
+          pointers && Object.keys(pointers).length
+            ? getPointersCenter(pointers)
+            : {
+                pageX: _originalEvent.pageX,
+                pageY: _originalEvent.pageY,
+              };
 
         // Zoom from the triggering point of the event
-        canvasData.left -= (newWidth - width) * (
-          ((center.pageX - offset.left) - canvasData.left) / width
-        );
-        canvasData.top -= (newHeight - height) * (
-          ((center.pageY - offset.top) - canvasData.top) / height
-        );
-      } else if (isPlainObject(pivot) && isNumber(pivot.x) && isNumber(pivot.y)) {
-        canvasData.left -= (newWidth - width) * (
-          (pivot.x - canvasData.left) / width
-        );
-        canvasData.top -= (newHeight - height) * (
-          (pivot.y - canvasData.top) / height
-        );
+        canvasData.left -=
+          (newWidth - width) *
+          ((center.pageX - offset.left - canvasData.left) / width);
+        canvasData.top -=
+          (newHeight - height) *
+          ((center.pageY - offset.top - canvasData.top) / height);
+      } else if (
+        isPlainObject(pivot) &&
+        isNumber(pivot.x) &&
+        isNumber(pivot.y)
+      ) {
+        canvasData.left -=
+          (newWidth - width) * ((pivot.x - canvasData.left) / width);
+        canvasData.top -=
+          (newHeight - height) * ((pivot.y - canvasData.top) / height);
       } else {
         // Zoom from the center of the canvas
         canvasData.left -= (newWidth - width) / 2;
@@ -314,7 +419,12 @@ export default {
   rotateTo(degree) {
     degree = Number(degree);
 
-    if (isNumber(degree) && this.ready && !this.disabled && this.options.rotatable) {
+    if (
+      isNumber(degree) &&
+      this.ready &&
+      !this.disabled &&
+      this.options.rotatable
+    ) {
       this.imageData.rotate = degree % 360;
       this.renderCanvas(true, true);
     }
@@ -382,12 +492,7 @@ export default {
    * @returns {Object} The result cropped data.
    */
   getData(rounded = false) {
-    const {
-      options,
-      imageData,
-      canvasData,
-      cropBoxData,
-    } = this;
+    const { options, imageData, canvasData, cropBoxData } = this;
     let data;
 
     if (this.ready && this.cropped) {
@@ -474,11 +579,11 @@ export default {
       const ratio = imageData.width / imageData.naturalWidth;
 
       if (isNumber(data.x)) {
-        cropBoxData.left = (data.x * ratio) + canvasData.left;
+        cropBoxData.left = data.x * ratio + canvasData.left;
       }
 
       if (isNumber(data.y)) {
-        cropBoxData.top = (data.y * ratio) + canvasData.top;
+        cropBoxData.top = data.y * ratio + canvasData.top;
       }
 
       if (isNumber(data.width)) {
@@ -520,16 +625,12 @@ export default {
     const data = {};
 
     if (this.ready) {
-      forEach([
-        'left',
-        'top',
-        'width',
-        'height',
-        'naturalWidth',
-        'naturalHeight',
-      ], (n) => {
-        data[n] = canvasData[n];
-      });
+      forEach(
+        ["left", "top", "width", "height", "naturalWidth", "naturalHeight"],
+        (n) => {
+          data[n] = canvasData[n];
+        }
+      );
     }
 
     return data;
@@ -642,12 +743,18 @@ export default {
     }
 
     const { canvasData } = this;
-    const source = getSourceCanvas(this.image, this.imageData, canvasData, options);
+    const source = getSourceCanvas(
+      this.image,
+      this.imageData,
+      canvasData,
+      options
+    );
 
     // Returns the source canvas if it is not cropped.
-    if (!this.cropped) {
-      return source;
-    }
+    // if (!this.cropped) {
+    //   console.log(source);
+    //   return source;
+    // }
 
     let {
       x: initialX,
@@ -670,15 +777,15 @@ export default {
       width: options.maxWidth || Infinity,
       height: options.maxHeight || Infinity,
     });
-    const minSizes = getAdjustedSizes({
-      aspectRatio,
-      width: options.minWidth || 0,
-      height: options.minHeight || 0,
-    }, 'cover');
-    let {
-      width,
-      height,
-    } = getAdjustedSizes({
+    const minSizes = getAdjustedSizes(
+      {
+        aspectRatio,
+        width: options.minWidth || 0,
+        height: options.minHeight || 0,
+      },
+      "cover"
+    );
+    let { width, height } = getAdjustedSizes({
       aspectRatio,
       width: options.width || (ratio !== 1 ? source.width : initialWidth),
       height: options.height || (ratio !== 1 ? source.height : initialHeight),
@@ -687,13 +794,13 @@ export default {
     width = Math.min(maxSizes.width, Math.max(minSizes.width, width));
     height = Math.min(maxSizes.height, Math.max(minSizes.height, height));
 
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
 
     canvas.width = normalizeDecimalNumber(width);
     canvas.height = normalizeDecimalNumber(height);
 
-    context.fillStyle = options.fillColor || 'transparent';
+    context.fillStyle = options.fillColor || "transparent";
     context.fillRect(0, 0, width, height);
 
     const { imageSmoothingEnabled = true, imageSmoothingQuality } = options;
@@ -752,12 +859,7 @@ export default {
       dstHeight = srcHeight;
     }
 
-    const params = [
-      srcX,
-      srcY,
-      srcWidth,
-      srcHeight,
-    ];
+    const params = [srcX, srcY, srcWidth, srcHeight];
 
     // Avoid "IndexSizeError"
     if (dstWidth > 0 && dstHeight > 0) {
@@ -767,14 +869,30 @@ export default {
         dstX * scale,
         dstY * scale,
         dstWidth * scale,
-        dstHeight * scale,
+        dstHeight * scale
       );
     }
 
     // All the numerical parameters should be integer for `drawImage`
     // https://github.com/fengyuanchen/cropper/issues/476
-    context.drawImage(source, ...params.map((param) => Math.floor(normalizeDecimalNumber(param))));
 
+    var background = new Image();
+    background.crossOrigin =
+      "https://images.pexels.com/photos/4879860/pexels-photo-4879860.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load";
+    background.src =
+      "https://images.pexels.com/photos/4879860/pexels-photo-4879860.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load";
+
+    // Make sure the image is loaded first otherwise nothing will draw.
+    background.onload = function () {
+      context.drawImage(background, 0, 0);
+
+      
+    };
+
+    context.drawImage(
+      source,
+      ...params.map((param) => Math.floor(normalizeDecimalNumber(param)))
+    );
     return canvas;
   },
 
@@ -814,7 +932,7 @@ export default {
       const croppable = mode === DRAG_MODE_CROP;
       const movable = options.movable && mode === DRAG_MODE_MOVE;
 
-      mode = (croppable || movable) ? mode : DRAG_MODE_NONE;
+      mode = croppable || movable ? mode : DRAG_MODE_NONE;
 
       options.dragMode = mode;
       setData(dragBox, DATA_ACTION, mode);
